@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TKZR7X2Q');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VER | Visión Entre Ríos - Periodismo Político y Actualidad</title>
+    
+    <meta property="og:title" content="VER | Visión Entre Ríos - Periodismo Político y Actualidad">
+    <meta property="og:description" content="Toda la actualidad política, legislativa y social de la provincia de Entre Ríos en tiempo real.">
+    <meta property="og:image" content="https://visionentrerios.com.ar/logotipo.png">
+    <meta property="og:url" content="https://visionentrerios.com.ar">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="VER | Visión Entre Ríos">
+    <meta name="twitter:description" content="Periodismo Político y Actualidad de Entre Ríos.">
+    <meta name="twitter:image" content="https://visionentrerios.com.ar/logotipo.png">
+
+    <link rel="icon" type="image/png" href="logotipo.png">
+    <link rel="apple-touch-icon" href="logotipo.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase/dist/pocketbase.umd.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* === VARIABLES DE COLOR DINÁMICAS (MODO NOCHE Y DÍA) === */
+        :root {
+            --ver-red: #cc0000;
+            --ver-dark: #0f1115;
+            --ver-grey: #f4f5f7;
+            --ver-text: #1a1a1a;
+            --ver-border: #eaeaea;
+            --ver-bg-body: #ffffff;
+            --ver-card-bg: #ffffff;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        /* COLORES MODO NOCHE ACTIVADO */
+        body.dark-mode {
+            --ver-bg-body: #0b0c10;
+            --ver-text: #e0e0e0;
+            --ver-dark: #1a1a1a;
+            --ver-border: #2a2d34;
+            --ver-grey: #161a21;
+            --ver-card-bg: #12161d;
+        }
+
+        /* === RESETEO GENERAL === */
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
+
+        body { 
+            background-color: var(--ver-bg-body); 
+            color: var(--ver-text); 
+            font-family: var(--font-main); 
+            line-height: 1.5; 
+            overflow-x: hidden; 
+            -webkit-font-smoothing: antialiased; 
+            transition: background-color 0.3s, color 0.3s; 
+        }
+
+        a { 
+            text-decoration: none; 
+            color: inherit; 
+        }
+
+        /* === BARRA FINANCIERA PREMIUM EN TIEMPO REAL === */
+        .financial-ticker-wrapper { 
+            background: #000000; 
+            border-bottom: 1px solid #1a1a1a; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 4%; 
+            height: 48px; 
+            font-family: var(--font-main); 
+            overflow: hidden; 
+            position: relative; 
+            z-index: 20;
+        }
+
+        .fin-live-badge { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            color: #ffffff; 
+            font-size: 0.75rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            padding-right: 20px; 
+            border-right: 1px solid #333; 
+            z-index: 2; 
+            background: #000000; 
+            height: 100%; 
+        }
+
+        .pulse-dot { 
+            width: 8px; 
+            height: 8px; 
+            background-color: var(--ver-red); 
+            border-radius: 50%; 
+            animation: pulse-red 1.5s infinite; 
+        }
+
+        @keyframes pulse-red { 
+            0% { box-shadow: 0 0 0 0 rgba(204, 0, 0, 0.8); } 
+            70% { box-shadow: 0 0 0 6px rgba(204, 0, 0, 0); } 
+            100% { box-shadow: 0 0 0 0 rgba(204, 0, 0, 0); } 
+        }
+
+        .fin-data-container { 
+            flex-grow: 1; 
+            overflow-x: auto; 
+            display: flex; 
+            align-items: center; 
+            scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .fin-data-container::-webkit-scrollbar { 
+            display: none; 
+        }
+
+        .fin-track { 
+            display: flex; 
+            gap: 30px; 
+            padding: 0 20px; 
+            align-items: center; 
+            width: max-content; 
+        }
+
+        .fin-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+
+        .fin-name { 
+            color: #aaaaaa; 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+        }
+
+        .fin-values { 
+            display: flex; 
+            gap: 10px; 
+            font-size: 0.9rem; 
+            font-weight: 900; 
+        }
+
+        .fin-val-box { 
+            display: flex; 
+            align-items: baseline; 
+            gap: 4px; 
+        }
+
+        .fin-lbl { 
+            font-size: 0.65rem; 
+            color: #666666; 
+            font-weight: 800; 
+        }
+
+        .fin-buy { 
+            color: #00e676; 
+        } 
+
+        .fin-sell { 
+            color: #ffffff; 
+        }
+
+        .fin-single { 
+            color: #ffffff; 
+        } 
+
+        .fin-update { 
+            font-size: 0.7rem; 
+            color: #666666; 
+            font-weight: 600; 
+            padding-left: 20px; 
+            border-left: 1px solid #333; 
+            white-space: nowrap; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            background: #000000; 
+            height: 100%; 
+            z-index: 2;
+        }
+
+        /* === HEADER Y MENÚ DE NAVEGACIÓN === */
+        header { 
+            padding: 1.5rem 4%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            border-bottom: 2px solid var(--ver-border); 
+            background: var(--ver-bg-body); 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02); 
+            position: relative; 
+            z-index: 10; 
+            transition: background-color 0.3s; 
+        }
+
+        .logo-container img { 
+            height: 90px; 
+            width: auto; 
+            object-fit: contain; 
+            transition: filter 0.3s; 
+        }
+
+        body.dark-mode .logo-container img { 
+            filter: brightness(0) invert(1); 
+        }
+        
+        nav.main-nav { 
+            display: flex; 
+            gap: 1.2rem; 
+            flex-wrap: wrap; 
+            justify-content: center;
+        }
+
+        nav.main-nav a { 
+            font-size: 0.8rem; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px; 
+            transition: color 0.2s; 
+            color: var(--ver-text); 
+        }
+
+        nav.main-nav a:hover { 
+            color: var(--ver-red); 
+        }
+
+        .header-actions { 
+            display: flex; 
+            align-items: center; 
+            gap: 1.5rem; 
+            font-size: 0.85rem; 
+            font-weight: 800; 
+        }
+        
+        /* BOTÓN MODO NOCHE */
+        .theme-toggle { 
+            background: var(--ver-grey); 
+            border: 1px solid var(--ver-border); 
+            color: var(--ver-text); 
+            width: 36px; 
+            height: 36px; 
+            border-radius: 50%; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            transition: 0.3s; 
+            font-size: 1rem; 
+        }
+
+        .theme-toggle:hover { 
+            background: var(--ver-red); 
+            color: white; 
+            border-color: var(--ver-red); 
+        }
+
+        .header-actions .vip-link { 
+            color: var(--ver-red); 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+        }
+
+        .header-actions .separator { 
+            width: 1px; 
+            height: 20px; 
+            background-color: var(--ver-border); 
+        }
+
+        .header-actions .btn-suscribite { 
+            background-color: var(--ver-red); 
+            color: white; 
+            padding: 10px 18px; 
+            border-radius: 4px; 
+            text-transform: uppercase; 
+            transition: all 0.3s; 
+            box-shadow: 0 4px 10px rgba(204,0,0,0.2);
+        }
+
+        .header-actions .btn-suscribite:hover { 
+            background-color: #990000; 
+            transform: translateY(-2px); 
+        }
+
+        /* === TICKER (ALERTA URGENTE) === */
+        .ticker-wrap { 
+            background-color: #050505; 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            overflow: hidden; 
+            height: 45px; 
+            border-bottom: 1px solid #222; 
+        }
+
+        .ticker-label { 
+            background-color: var(--ver-red); 
+            color: white; 
+            padding: 0 1.5rem; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            font-weight: 900; 
+            font-size: 0.85rem; 
+            text-transform: uppercase; 
+            z-index: 2; 
+            position: relative; 
+            white-space: nowrap; 
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+        }
+
+        .ticker-move { 
+            display: inline-block; 
+            white-space: nowrap; 
+            padding-left: 2rem; 
+            animation: ticker 30s linear infinite; 
+        }
+
+        .ticker-item { 
+            display: inline-block; 
+            padding-right: 4rem; 
+            font-size: 0.95rem; 
+            font-weight: 800; 
+            color: #ffffff; 
+            text-transform: uppercase; 
+        }
+
+        .ticker-item a { 
+            transition: color 0.2s; 
+        }
+
+        .ticker-item a:hover { 
+            color: #aaaaaa; 
+        }
+        
+        @keyframes ticker { 
+            0% { transform: translate3d(0, 0, 0); } 
+            100% { transform: translate3d(-50%, 0, 0); } 
+        }
+
+        /* === CONTENEDOR PRINCIPAL === */
+        .container { 
+            max-width: 1400px; 
+            margin: 0 auto; 
+            padding: 2rem 4%; 
+        }
+
+        .top-grid { 
+            display: grid; 
+            grid-template-columns: 2.2fr 1.2fr 1fr; 
+            gap: 2.5rem; 
+            margin-bottom: 4rem; 
+        }
+
+        .section-title { 
+            font-size: 0.85rem; 
+            font-weight: 900; 
+            color: var(--ver-red); 
+            text-transform: uppercase; 
+            border-bottom: 2px solid var(--ver-dark); 
+            padding-bottom: 8px; 
+            margin-bottom: 20px; 
+            letter-spacing: 0.5px; 
+            transition: border-color 0.3s; 
+        }
+
+        /* TAPA PRINCIPAL */
+        .hero-article { 
+            position: relative; 
+            width: 100%; 
+            height: 520px; 
+            background-color: #111; 
+            overflow: hidden; 
+            border-radius: 6px; 
+            display: block; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
+        }
+
+        .hero-article img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            opacity: 0.7; 
+            transition: transform 0.6s ease, opacity 0.6s ease; 
+            background-color: var(--ver-grey); 
+        }
+
+        .hero-article:hover img { 
+            opacity: 0.9; 
+            transform: scale(1.04); 
+        }
+
+        .hero-content { 
+            position: absolute; 
+            bottom: 0; 
+            left: 0; 
+            padding: 2.5rem; 
+            width: 100%; 
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 40%, rgba(0,0,0,0) 100%); 
+            color: white; 
+        }
+
+        .tag-red { 
+            background-color: var(--ver-red); 
+            color: white; 
+            padding: 5px 12px; 
+            font-size: 0.7rem; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            display: inline-block; 
+            margin-bottom: 15px; 
+            border-radius: 3px;
+        }
+
+        .hero-title { 
+            font-size: 3.2rem; 
+            font-weight: 900; 
+            line-height: 1.05; 
+            margin-bottom: 15px; 
+            letter-spacing: -1px; 
+            text-shadow: 1px 2px 4px rgba(0,0,0,0.6); 
+        }
+
+        .hero-bajada { 
+            font-size: 1.15rem; 
+            font-weight: 500; 
+            margin-bottom: 20px; 
+            max-width: 90%; 
+            color: #f0f0f0; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+        }
+
+        /* ÚLTIMAS NOTICIAS */
+        .ultimas-col { 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .ultima-item { 
+            display: grid; 
+            grid-template-columns: 85px 1fr; 
+            gap: 15px; 
+            border-bottom: 1px solid var(--ver-border); 
+            padding-bottom: 15px; 
+            margin-bottom: 15px; 
+            align-items: center; 
+            transition: 0.2s; 
+            padding: 10px; 
+            border-radius: 6px; 
+            margin-left: -10px; 
+            margin-right: -10px;
+        }
+
+        .ultima-item:last-of-type { 
+            border-bottom: none; 
+        }
+        
+        .ultima-item:hover { 
+            background-color: var(--ver-grey); 
+        }
+
+        .ultima-item img { 
+            width: 100%; 
+            height: 85px; 
+            object-fit: cover; 
+            border-radius: 4px; 
+            background-color: var(--ver-border);
+        }
+
+        .ultima-text { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+
+        .ultima-time { 
+            color: var(--ver-red); 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            margin-bottom: 5px; 
+            display: block; 
+        }
+
+        .ultima-title { 
+            font-size: 1.05rem; 
+            font-weight: 800; 
+            line-height: 1.25; 
+            color: var(--ver-text); 
+            transition: color 0.2s; 
+            display: block; 
+        }
+
+        .ultima-item:hover .ultima-title { 
+            color: var(--ver-red); 
+        }
+
+        /* OPINIÓN Y CLIMA */
+        .opinion-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .opinion-item { 
+            display: grid; 
+            grid-template-columns: 55px 1fr; 
+            gap: 15px; 
+            border-bottom: 1px solid var(--ver-border); 
+            padding-bottom: 15px; 
+            margin-bottom: 15px; 
+            align-items: center; 
+        }
+
+        .opinion-item img { 
+            width: 55px; 
+            height: 55px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            filter: grayscale(100%); 
+            transition: filter 0.3s, transform 0.3s; 
+            background-color: var(--ver-border);
+        }
+
+        .opinion-item:hover img { 
+            filter: grayscale(0%); 
+            transform: scale(1.05);
+        }
+
+        .opinion-title { 
+            font-size: 1rem; 
+            font-weight: 800; 
+            line-height: 1.2; 
+            margin-bottom: 5px; 
+            display: block; 
+            color: var(--ver-text); 
+            transition: color 0.2s; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden;
+        }
+
+        .opinion-title:hover { 
+            color: var(--ver-red); 
+        }
+
+        .opinion-author { 
+            font-size: 0.8rem; 
+            color: #777; 
+            font-weight: 600; 
+            text-transform: uppercase; 
+        }
+        
+        .clima-wrapper { 
+            margin-top: auto; 
+            width: 100%;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        .clima-wrapper iframe {
+            max-width: 100%;
+        }
+
+        /* DESTACADAS */
+        .destacadas-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 25px; 
+            margin-bottom: 4rem; 
+        }
+
+        .destacada-item { 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .destacada-item img { 
+            width: 100%; 
+            height: 180px; 
+            object-fit: cover; 
+            border-radius: 6px; 
+            margin-bottom: 12px; 
+            transition: transform 0.4s ease; 
+            background-color: var(--ver-border);
+        }
+
+        .destacada-item:hover img { 
+            transform: translateY(-5px); 
+        }
+
+        .destacada-title { 
+            font-size: 1.15rem; 
+            font-weight: 800; 
+            line-height: 1.3; 
+            color: var(--ver-text); 
+            transition: color 0.2s; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 3; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden;
+        }
+
+        .destacada-item:hover .destacada-title { 
+            color: var(--ver-red); 
+        }
+
+        /* EVENTOS Y AGENDA */
+        .eventos-section { 
+            background-color: var(--ver-grey); 
+            padding: 4rem 4%; 
+            margin-bottom: 4rem; 
+            border-top: 1px solid var(--ver-border); 
+            border-bottom: 1px solid var(--ver-border); 
+            transition: 0.3s;
+        }
+
+        .eventos-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 2rem; 
+            border-bottom: 2px solid var(--ver-dark); 
+            padding-bottom: 10px; 
+            transition: 0.3s;
+        }
+
+        .eventos-header h3 { 
+            font-size: 1.6rem; 
+            color: var(--ver-text); 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            margin: 0;
+        }
+
+        .eventos-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+            gap: 25px; 
+        }
+
+        .evento-card { 
+            background: var(--ver-card-bg); 
+            color: var(--ver-text); 
+            padding: 2rem; 
+            border-radius: 6px; 
+            border-left: 5px solid var(--ver-red); 
+            transition: transform 0.3s, box-shadow 0.3s; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .evento-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.1); 
+        }
+
+        .evento-fecha { 
+            font-size: 0.85rem; 
+            color: var(--ver-red); 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            margin-bottom: 12px; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        .evento-titulo { 
+            font-size: 1.25rem; 
+            font-weight: 900; 
+            line-height: 1.3; 
+            margin-bottom: 15px; 
+        }
+
+        /* NEWSLETTER */
+        .newsletter-banner { 
+            background-color: #050505; 
+            color: white; 
+            padding: 4rem 5%; 
+            margin-bottom: 5rem; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border-left: 8px solid var(--ver-red); 
+            border-radius: 6px;
+        }
+
+        .nl-text h3 { 
+            font-size: 2rem; 
+            font-weight: 900; 
+            margin-bottom: 10px; 
+        }
+
+        .nl-text p { 
+            color: #ccc; 
+            font-size: 1.1rem; 
+        }
+
+        .nl-form { 
+            display: flex; 
+            gap: 10px; 
+            width: 45%; 
+        }
+
+        .nl-form input { 
+            flex-grow: 1; 
+            padding: 15px 20px; 
+            border: none; 
+            outline: none; 
+            font-size: 1rem; 
+            border-radius: 4px; 
+        }
+
+        .nl-form button { 
+            background-color: var(--ver-red); 
+            color: white; 
+            border: none; 
+            padding: 0 30px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            cursor: pointer; 
+            transition: background 0.3s; 
+            border-radius: 4px;
+        }
+
+        .nl-form button:hover { 
+            background-color: #990000; 
+        }
+
+        /* GRID INFERIOR (EN FOCO & MÁS LEÍDO) */
+        .lower-grid { 
+            display: grid; 
+            grid-template-columns: 2fr 1fr; 
+            gap: 4rem; 
+            margin-bottom: 4rem; 
+        }
+
+        .foco-item { 
+            display: grid; 
+            grid-template-columns: 1.2fr 2fr; 
+            gap: 20px; 
+            border-bottom: 1px solid var(--ver-border); 
+            padding-bottom: 25px; 
+            margin-bottom: 25px; 
+        }
+
+        .foco-item:last-child { 
+            border-bottom: none; 
+        }
+
+        .foco-item img { 
+            width: 100%; 
+            height: 160px; 
+            object-fit: cover; 
+            border-radius: 6px; 
+            transition: transform 0.4s ease; 
+            background-color: var(--ver-border);
+        }
+
+        .foco-item-img-wrap { 
+            overflow: hidden; 
+            border-radius: 6px; 
+        }
+
+        .foco-item:hover img { 
+            transform: scale(1.05); 
+        }
+
+        .foco-info { 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+        }
+
+        .foco-title { 
+            font-size: 1.5rem; 
+            font-weight: 900; 
+            line-height: 1.2; 
+            margin-bottom: 10px; 
+            color: var(--ver-text); 
+            transition: 0.2s;
+        }
+
+        .foco-item:hover .foco-title { 
+            color: var(--ver-red); 
+        }
+
+        .foco-bajada { 
+            font-size: 1.05rem; 
+            color: #777; 
+            display: -webkit-box; 
+            -webkit-line-clamp: 2; 
+            -webkit-box-orient: vertical; 
+            overflow: hidden; 
+            line-height: 1.5;
+        }
+
+        .ranking-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 20px; 
+            border-bottom: 1px solid var(--ver-border); 
+            padding-bottom: 18px; 
+            margin-bottom: 18px; 
+        }
+
+        .ranking-number { 
+            font-size: 3rem; 
+            font-weight: 900; 
+            color: transparent; 
+            -webkit-text-stroke: 1px #888; 
+            transition: 0.3s; 
+        }
+
+        .ranking-item:hover .ranking-number { 
+            color: var(--ver-red); 
+            -webkit-text-stroke: 1px var(--ver-red); 
+            transform: scale(1.1); 
+        }
+
+        .ranking-title { 
+            font-size: 1.05rem; 
+            font-weight: 800; 
+            line-height: 1.3; 
+            color: var(--ver-text); 
+            transition: 0.2s;
+        }
+
+        .ranking-item:hover .ranking-title { 
+            color: var(--ver-red); 
+        }
+
+        /* FEED GENERAL */
+        .feed-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 35px; 
+            margin-bottom: 5rem; 
+        }
+
+        .feed-card { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            overflow: hidden; 
+            background: var(--ver-card-bg); 
+            border: 1px solid var(--ver-border); 
+            border-radius: 8px; 
+            padding: 20px; 
+            transition: transform 0.3s, box-shadow 0.3s; 
+        }
+
+        .feed-card:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+        }
+
+        .feed-card-img-wrap { 
+            overflow: hidden; 
+            border-radius: 4px; 
+            margin-bottom: 15px; 
+            margin: -20px -20px 15px -20px;
+        } 
+
+        .feed-card img { 
+            width: 100%; 
+            height: 200px; 
+            object-fit: cover; 
+            transition: transform 0.5s; 
+            display: block; 
+            background-color: var(--ver-border);
+        }
+
+        .feed-card:hover img { 
+            transform: scale(1.05); 
+        }
+
+        .feed-card-title { 
+            font-size: 1.35rem; 
+            font-weight: 900; 
+            line-height: 1.25; 
+            margin-bottom: 10px; 
+            color: var(--ver-text); 
+            transition: 0.2s; 
+        }
+
+        .feed-card:hover .feed-card-title { 
+            color: var(--ver-red); 
+        }
+
+        .feed-meta { 
+            font-size: 0.75rem; 
+            color: #888; 
+            font-weight: 800; 
+            text-transform: uppercase; 
+            margin-top: auto; 
+            border-top: 1px solid var(--ver-border); 
+            padding-top: 15px; 
+        }
+
+        /* FOOTER */
+        footer { 
+            background-color: #050505; 
+            color: white; 
+            padding: 3rem 4%; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 0.9rem; 
+            font-weight: 500; 
+            border-top: 4px solid var(--ver-red); 
+        }
+
+        .footer-left a { 
+            color: #ccc; 
+            margin-left: 15px; 
+            transition: color 0.2s; 
+        }
+
+        .footer-left a:hover { 
+            color: white; 
+        }
+
+        .footer-right { 
+            display: flex; 
+            gap: 20px; 
+            font-size: 1.3rem; 
+        }
+
+        .footer-right a { 
+            color: #ccc; 
+            transition: 0.2s;
+        }
+
+        .footer-right a:hover { 
+            color: var(--ver-red); 
+            transform: scale(1.15); 
+            display: inline-block; 
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1024px) {
+            .top-grid { grid-template-columns: 1fr 1fr; }
+            .hero-article { grid-column: span 2; }
+            .destacadas-grid { grid-template-columns: repeat(2, 1fr); }
+            .feed-grid { grid-template-columns: repeat(2, 1fr); }
+            nav.main-nav { display: none; } 
+            .newsletter-banner { flex-direction: column; text-align: center; gap: 25px; padding: 3rem; }
+            .nl-form { width: 100%; flex-direction: column; }
+            .nl-form button { padding: 15px; }
+            .lower-grid { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            .financial-ticker-wrapper { padding: 0 10px; }
+            .fin-live-badge span.text { display: none; } 
+            .fin-live-badge { padding-right: 10px; }
+            .fin-update { display: none; } 
+
+            .top-grid { grid-template-columns: 1fr; }
+            .hero-article { grid-column: span 1; height: 400px; }
+            .hero-title { font-size: 2.2rem; }
+            .destacadas-grid { grid-template-columns: 1fr; }
+            .feed-grid { grid-template-columns: 1fr; }
+            
+            header { flex-wrap: wrap; justify-content: center; }
+            .logo-container img { height: 60px; max-width: 100%; }
+            .header-actions { width: 100%; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+            
+            .ticker-label { padding: 0 10px; font-size: 0.75rem; }
+            .ticker-item { font-size: 0.85rem; padding-right: 2rem; }
+            
+            .clima-wrapper { max-width: 100%; overflow: hidden; }
+            .foco-item { grid-template-columns: 1fr; }
+            .foco-item-img-wrap img { height: 220px; }
+            
+            footer { flex-direction: column; gap: 20px; text-align: center; }
+            .footer-left { display: flex; flex-direction: column; gap: 10px;}
+            .footer-left a { margin-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="financial-ticker-wrapper" id="financial-bar">
+        <div class="fin-live-badge">
+            <div class="pulse-dot"></div>
+            <span class="text">MERCADOS</span>
+        </div>
+        <div class="fin-data-container">
+            <div class="fin-track" id="fin-track">
+                <span style="color:#aaa; font-size: 0.8rem;"><i class="fa-solid fa-circle-notch fa-spin"></i> Conectando...</span>
+            </div>
+        </div>
+        <div class="fin-update" id="fin-update-time">
+            <i class="fa-regular fa-clock"></i> Actualizando...
+        </div>
+    </div>
+
+    <header>
+        <div class="logo-container">
+            <a href="index.html"><img src="logotipo.png" alt="VER"></a>
+        </div>
+        <nav class="main-nav">
+            <a href="seccion.html?rubro=politica">Política</a>
+            <a href="seccion.html?rubro=gobierno">Gobierno</a>
+            <a href="seccion.html?rubro=economia">Economía</a>
+            <a href="seccion.html?rubro=sociedad">Sociedad</a>
+        </nav>
+        <div class="header-actions">
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+            <div class="separator"></div>
+            <a href="admin.html" class="vip-link">VIP</a>
+            <div class="separator"></div>
+            <a href="#" class="btn-suscribite">Suscribite</a>
+        </div>
+    </header>
+
+    <div class="ticker-wrap" id="ticker-wrap" style="display: none;">
+        <div class="ticker-label"><i class="fa-solid fa-bolt" style="margin-right: 8px;"></i> ÚLTIMO MOMENTO</div>
+        <div class="ticker-move" id="ticker-content"></div>
+    </div>
+
+    <div class="container">
+        <div class="top-grid">
+            <div id="hero-container">
+                <div class="hero-article" style="background:var(--ver-border);">
+                    <div style="padding: 2rem; color: #888;">Cargando portada...</div>
+                </div>
+            </div>
+            
+            <div class="ultimas-col">
+                <h3 class="section-title">Últimas Noticias</h3>
+                <div id="ultimas-container">
+                    <div style="padding:10px; color:#aaa; font-size:0.85rem;"><i class="fa-solid fa-spinner fa-spin"></i> Buscando...</div>
+                </div>
+            </div>
+            
+            <div class="opinion-col">
+                <h3 class="section-title">Clima</h3>
+                <div class="clima-wrapper">
+                    <iframe src="https://api.wo-cloud.com/content/widget/?geoObjectKey=9162236&language=es&region=AR&timeFormat=HH:mm&windUnit=kmh&systemOfMeasurement=metric&temperatureUnit=celsius" name="CW2" scrolling="no" width="100%" height="318" frameborder="0" style="border: 1px solid #10658E; border-radius: 8px;"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Destacadas</h3>
+        <div class="destacadas-grid" id="destacadas-container">
+            <div style="color:#aaa;">Cargando bloque...</div>
+        </div>
+
+        <section class="eventos-section">
+            <div class="eventos-header">
+                <h3>Agenda y Eventos</h3>
+            </div>
+            <div class="eventos-grid" id="eventos-container">
+                <div style="color:#aaa;">Cargando eventos...</div>
+            </div>
+        </section>
+
+        <div class="newsletter-banner">
+            <div class="nl-text">
+                <h3>La política, directo en tu correo</h3>
+                <p>Suscribite a nuestro Newsletter y recibí el análisis que nadie más te cuenta.</p>
+            </div>
+            <div class="nl-form">
+                <input type="email" placeholder="Ingresá tu correo electrónico">
+                <button>Suscribirme</button>
+            </div>
+        </div>
+
+        <div class="lower-grid">
+            <div>
+                <h3 class="section-title">En Foco</h3>
+                <div id="foco-container">
+                    <div style="color:#aaa;">Cargando artículos...</div>
+                </div>
+            </div>
+            <div>
+                <h3 class="section-title">Lo Más Leído</h3>
+                <div id="ranking-container">
+                    <div style="color:#aaa;">Cargando ranking...</div>
+                </div>
+            </div>
+        </div>
+
+        <h3 class="section-title">Más Noticias Recientes</h3>
+        <div class="feed-grid" id="mas-noticias-container">
+            <div style="color:#aaa;">Cargando historial...</div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-left">
+            <span>&copy; <span id="year"></span> Visión Entre Ríos (VER)</span>
+            <a href="#">Quiénes somos</a> | <a href="#">Contacto</a> | <a href="#">Newsletter</a>
+        </div>
+        <div class="footer-right">
+            <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // MODO NOCHE
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const themeIcon = themeToggle.querySelector('i');
+        
+        if (localStorage.getItem('theme') === 'dark') { 
+            body.classList.add('dark-mode'); 
+            themeIcon.classList.replace('fa-moon', 'fa-sun'); 
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            if (isDark) {
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
+            } else {
+                themeIcon.classList.replace('fa-sun', 'fa-moon');
+            }
+        });
+
+        const pb = new PocketBase('https://ver.pockethost.io'); 
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        // MERCADOS
+        async function cargarCotizaciones() {
+            try {
+                const fetchCotizacion = async (url) => { 
+                    try { 
+                        const res = await fetch(url); 
+                        return await res.json(); 
+                    } catch(e) { 
+                        return null; 
+                    } 
+                };
+                
+                const [oficial, blue, mep, ccl, tarjeta, euro] = await Promise.all([
+                    fetchCotizacion('https://dolarapi.com/v1/dolares/oficial'), 
+                    fetchCotizacion('https://dolarapi.com/v1/dolares/blue'),
+                    fetchCotizacion('https://dolarapi.com/v1/dolares/mep'), 
+                    fetchCotizacion('https://dolarapi.com/v1/dolares/ccl'),
+                    fetchCotizacion('https://dolarapi.com/v1/dolares/tarjeta'), 
+                    fetchCotizacion('https://dolarapi.com/v1/cotizaciones/eur')
+                ]);
+
+                const format = (nombre, data, isUnico = false) => {
+                    if(!data) return '';
+                    if(isUnico) {
+                        return `
+                        <div class="fin-item">
+                            <span class="fin-name">${nombre}</span>
+                            <div class="fin-values">
+                                <span class="fin-single">$${data.venta}</span>
+                            </div>
+                        </div>`;
+                    }
+                    return `
+                    <div class="fin-item">
+                        <span class="fin-name">${nombre}</span>
+                        <div class="fin-values">
+                            <div class="fin-val-box">
+                                <span class="fin-lbl">C</span>
+                                <span class="fin-buy">$${data.compra}</span>
+                            </div>
+                            <div class="fin-val-box">
+                                <span class="fin-lbl">V</span>
+                                <span class="fin-sell">$${data.venta}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                };
+
+                let html = format('Dólar Oficial', oficial) + 
+                           format('Dólar Blue', blue) + 
+                           format('Dólar Tarjeta', tarjeta, true) + 
+                           format('Dólar MEP', mep) + 
+                           format('Dólar CCL', ccl) + 
+                           format('Euro', euro);
+                
+                document.getElementById('fin-track').innerHTML = html;
+                document.getElementById('fin-update-time').innerHTML = `<i class="fa-regular fa-clock"></i> Actualizado ${new Date().toLocaleTimeString('es-AR', {hour: '2-digit', minute:'2-digit'})}`;
+            } catch (e) { 
+                document.getElementById('fin-track').innerHTML = '<span style="color:#888;">Mercados cerrados</span>'; 
+            }
+        }
+        
+        cargarCotizaciones(); 
+        setInterval(cargarCotizaciones, 60000);
+
+        // NOTICIAS
+        async function cargarPortal() {
+            try {
+                const records = await pb.collection('articulos').getFullList({ sort: '-created' });
+                let pool = [...records];
+                
+                if(pool.length === 0) return;
+
+                let urgentesItems = pool.filter(a => a.categoria === 'urgente').slice(0, 5);
+                
+                if (urgentesItems.length > 0) {
+                    document.getElementById('ticker-wrap').style.display = 'flex';
+                    let itemsHTML = urgentesItems.map(item => `
+                        <span class="ticker-item">
+                            <a href="noticia.html?id=${item.id}">
+                                <i class="fa-solid fa-bolt" style="color:var(--ver-red); margin-right:8px;"></i> ${item.titulo}
+                            </a>
+                        </span>
+                    `).join('');
+                    document.getElementById('ticker-content').innerHTML = itemsHTML + itemsHTML;
+                }
+
+                pool = pool.filter(a => a.categoria !== 'evento' && a.categoria !== 'urgente'); 
+
+                let tapa = pool.find(a => a.categoria === 'relevante') || pool[0];
+                
+                if (tapa) {
+                    pool = pool.filter(a => a.id !== tapa.id);
+                    const tapaImg = tapa.imagen ? pb.files.getUrl(tapa, tapa.imagen) : 'https://via.placeholder.com/800x500?text=VER';
+                    document.getElementById('hero-container').innerHTML = `
+                        <a href="noticia.html?id=${tapa.id}" class="hero-article">
+                            <img src="${tapaImg}" loading="lazy" alt="${tapa.titulo}">
+                            <div class="hero-content">
+                                <span class="tag-red">${tapa.seccion || 'Tapa'}</span>
+                                <h1 class="hero-title">${tapa.titulo}</h1>
+                            </div>
+                        </a>`;
+                }
+
+                let ultimas = pool.slice(0, 5);
+                pool = pool.filter(a => !ultimas.includes(a));
+                
+                if(ultimas.length > 0) {
+                    document.getElementById('ultimas-container').innerHTML = ultimas.map(item => {
+                        const imgUrl = item.imagen ? pb.files.getUrl(item, item.imagen, {'thumb': '100x100'}) : 'https://via.placeholder.com/100x100?text=VER';
+                        const hora = new Date(item.created).toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+                        return `
+                        <div class="ultima-item">
+                            <a href="noticia.html?id=${item.id}">
+                                <img src="${imgUrl}" loading="lazy">
+                            </a>
+                            <div>
+                                <span class="ultima-time">${hora}</span>
+                                <a href="noticia.html?id=${item.id}" class="ultima-title">${item.titulo}</a>
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+
+                let destacadas = pool.slice(0, 4);
+                pool = pool.filter(a => !destacadas.includes(a));
+                
+                if(destacadas.length > 0) {
+                    document.getElementById('destacadas-container').innerHTML = destacadas.map(item => {
+                        const imgUrl = item.imagen ? pb.files.getUrl(item, item.imagen, {'thumb': '400x300'}) : 'https://via.placeholder.com/400x300?text=VER';
+                        return `
+                        <a href="noticia.html?id=${item.id}" class="destacada-item">
+                            <img src="${imgUrl}" loading="lazy">
+                            <h4 class="destacada-title">${item.titulo}</h4>
+                        </a>`;
+                    }).join('');
+                }
+
+                if (pool.length > 0) {
+                    document.getElementById('mas-noticias-container').innerHTML = pool.map(item => {
+                        const imgUrl = item.imagen ? pb.files.getUrl(item, item.imagen, {'thumb': '400x300'}) : 'https://via.placeholder.com/400x300?text=VER';
+                        return `
+                        <a href="noticia.html?id=${item.id}" class="feed-card">
+                            <img src="${imgUrl}" loading="lazy">
+                            <div>
+                                <span class="tag-red">${item.seccion || 'General'}</span>
+                            </div>
+                            <h4 class="feed-card-title">${item.titulo}</h4>
+                        </a>`;
+                    }).join('');
+                }
+
+            } catch (e) { 
+                console.log("Error:", e); 
+            }
+        }
+        
+        cargarPortal();
+    </script>
+</body>
+</html>

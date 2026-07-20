@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TKZR7X2Q');</script>
+    <!-- End Google Tag Manager -->
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sección | Visión Entre Ríos</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase/dist/pocketbase.umd.js"></script>
+    
+    <!-- LIBRERÍA DE ÍCONOS (FontAwesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === VARIABLES & RESET (Nueva Identidad Visual) === */
+        :root {
+            --ver-red: #cc0000;
+            --ver-dark: #000000;
+            --ver-grey: #f4f4f4;
+            --ver-bg-body: #ffffff; 
+            --ver-text-main: #111111;
+            --ver-border: #e0e0e0; 
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--ver-bg-body); color: var(--ver-text-main); font-family: var(--font-main); line-height: 1.5; overflow-x: hidden; }
+        a { text-decoration: none; color: inherit; }
+
+        /* === HEADER (Idéntico a index.html) === */
+        header { padding: 1.5rem 4%; display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid var(--ver-red); background: white; position: sticky; top: 0; z-index: 1000; }
+        .logo-container img { height: 50px; width: auto; object-fit: contain; }
+        
+        nav.main-nav { display: flex; gap: 1.5rem; }
+        nav.main-nav a { font-size: 0.85rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s; }
+        nav.main-nav a:hover { color: var(--ver-red); }
+
+        .header-actions { display: flex; align-items: center; gap: 1.5rem; font-size: 0.85rem; font-weight: 800; }
+        .header-actions .vip-link { color: var(--ver-red); text-transform: uppercase; }
+        .header-actions .separator { width: 1px; height: 20px; background-color: #ccc; }
+        .header-actions .search-btn { font-size: 1.1rem; cursor: pointer; }
+        .header-actions .btn-suscribite { background-color: var(--ver-red); color: white; padding: 8px 15px; border-radius: 2px; text-transform: uppercase; transition: background 0.3s; }
+        .header-actions .btn-suscribite:hover { background-color: #990000; }
+
+        /* === LAYOUT DE SECCIÓN === */
+        .container { max-width: 1400px; margin: 0 auto; padding: 3rem 4%; display: grid; grid-template-columns: 2.5fr 1fr; gap: 4rem; }
+        
+        /* Migas de pan y Título */
+        .breadcrumb { font-size: 0.75rem; font-weight: 800; color: #888; margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .breadcrumb a { color: var(--ver-dark); transition: color 0.2s; }
+        .breadcrumb a:hover { color: var(--ver-red); }
+        .breadcrumb span { margin: 0 10px; color: #ccc; }
+
+        .header-seccion { border-bottom: 2px solid var(--ver-red); margin-bottom: 2.5rem; padding-bottom: 10px; }
+        .titulo-seccion { color: var(--ver-dark); font-size: 2.5rem; font-weight: 900; letter-spacing: -1px; text-transform: uppercase; }
+
+        /* Tarjetas de noticias (Feed) */
+        .noticia-fila { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; border-bottom: 1px solid var(--ver-border); padding: 2rem 0; }
+        .noticia-fila:first-child { padding-top: 0; }
+        .noticia-fila:last-child { border-bottom: none; }
+        
+        .noticia-fila img { width: 100%; height: 240px; object-fit: cover; border-radius: 2px; }
+        .fila-texto { display: flex; flex-direction: column; justify-content: flex-start; }
+        
+        .tag-red { background-color: var(--ver-red); color: white; padding: 4px 10px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; display: inline-block; margin-bottom: 15px; letter-spacing: 1px; }
+        .titulo-noticia { font-size: 1.8rem; line-height: 1.15; font-weight: 900; color: var(--ver-dark); margin-bottom: 15px; transition: color 0.2s; letter-spacing: -0.5px; }
+        .noticia-fila a:hover .titulo-noticia { color: var(--ver-red); }
+        .bajada { color: #444; font-size: 1.15rem; line-height: 1.5; font-weight: 500; margin-bottom: 1.5rem; }
+        
+        .meta-info { font-size: 0.8rem; font-weight: 800; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-top: auto; }
+        .meta-autor { color: var(--ver-dark); margin-right: 15px; }
+
+        /* === SIDEBAR === */
+        .sidebar-titulo { font-size: 0.85rem; font-weight: 900; color: var(--ver-red); text-transform: uppercase; border-bottom: 1px solid var(--ver-border); padding-bottom: 10px; margin-bottom: 15px; letter-spacing: 0.5px; }
+        
+        /* Contenedor del Clima */
+        .clima-wrapper { border: 1px solid var(--ver-border); border-top: 3px solid var(--ver-red); padding: 10px; border-radius: 2px; background: #fafafa; margin-bottom: 3rem; }
+
+        /* === FOOTER === */
+        footer { background-color: var(--ver-dark); color: white; padding: 15px 4%; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; font-weight: 500; margin-top: 3rem; }
+        .footer-left a { color: white; margin-left: 15px; transition: color 0.2s; }
+        .footer-left a:hover { color: var(--ver-red); }
+        .footer-right { display: flex; gap: 20px; font-size: 1.2rem; }
+        .footer-right a:hover { color: var(--ver-red); }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 1024px) { 
+            .container { grid-template-columns: 1fr; } 
+            nav.main-nav { display: none; }
+        }
+        @media (max-width: 768px) { 
+            .noticia-fila { grid-template-columns: 1fr; gap: 1rem; } 
+            .noticia-fila img { height: auto; aspect-ratio: 16/9; } 
+            header { flex-wrap: wrap; gap: 15px; justify-content: center; }
+            .header-actions { width: 100%; justify-content: space-between; }
+            footer { flex-direction: column; gap: 15px; text-align: center; }
+            .titulo-seccion { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKZR7X2Q"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- ENCABEZADO -->
+    <header>
+        <div class="logo-container">
+            <a href="index.html"><img src="logotipo.png" alt="VER"></a>
+        </div>
+        <nav class="main-nav">
+            <a href="seccion.html?rubro=politica">Política</a>
+            <a href="seccion.html?rubro=gobierno">Gobierno</a>
+            <a href="seccion.html?rubro=legislatura">Legislatura</a>
+            <a href="seccion.html?rubro=municipios">Municipios</a>
+            <a href="seccion.html?rubro=economia">Economía</a>
+            <a href="seccion.html?rubro=justicia">Justicia</a>
+            <a href="seccion.html?rubro=sociedad">Sociedad</a>
+            <a href="seccion.html?rubro=opinion">Opinión</a>
+        </nav>
+        <div class="header-actions">
+            <a href="#" class="vip-link">Acceso VIP</a>
+            <div class="separator"></div>
+            <i class="fa-solid fa-magnifying-glass search-btn"></i>
+            <div class="separator"></div>
+            <a href="#" class="btn-suscribite">Suscribite</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- COLUMNA PRINCIPAL -->
+        <main class="main-content">
+            
+            <div class="breadcrumb">
+                <a href="index.html">Portada</a> <span>/</span> <span id="bread-seccion">Secciones</span>
+            </div>
+
+            <div class="header-seccion">
+                <h1 class="titulo-seccion" id="titulo-seccion">Cargando...</h1>
+            </div>
+
+            <div id="feed-seccion">
+                <p style="text-align: center; color: #888; padding: 3rem; font-weight: 800; font-size: 1.2rem;">Buscando noticias en el servidor...</p>
+            </div>
+
+        </main>
+
+        <!-- COLUMNA LATERAL -->
+        <aside class="sidebar">
+            <h3 class="sidebar-titulo">Datos del Tiempo</h3>
+            
+            <!-- WIDGET CLIMA INYECTADO EN TIEMPO REAL -->
+            <div class="clima-wrapper">
+                <div id="ww_60bfffeac8cbe" v='1.3' loc='id' a='{"t":"horizontal","lang":"es","sl_lpl":1,"ids":["wl6284"],"font":"Arial","sl_ics":"one_a","sl_sot":"celsius","cl_bkg":"image","cl_font":"#333333","cl_cloud":"#666666","cl_persp":"#81D4FA","cl_sun":"#FFC107","cl_moon":"#FFC107","cl_thund":"#FF5722"}'>Más previsiones: <a href="https://tiempolargo.com/buenos_aires_tiempo_25_dias/" id="ww_60bfffeac8cbe_u" target="_blank">Clima 30 dias</a></div><script async src="https://app3.weatherwidget.org/js/?id=ww_60bfffeac8cbe"></script>
+            </div>
+            
+            <div>
+                <h3 class="sidebar-titulo">Publicidad</h3>
+                <div style="background:#f4f4f4; height:300px; display:flex; align-items:center; justify-content:center; color:#bbb; font-size:0.75rem; border: 1px solid #eee; text-transform: uppercase; font-weight: 800; letter-spacing: 1px;">Espacio Patrocinado</div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer>
+        <div class="footer-left">
+            <span>&copy; <span id="year"></span> Visión Entre Ríos (VER)</span>
+            <a href="#">Quiénes somos</a> | 
+            <a href="#">Contacto</a> | 
+            <a href="#">Newsletter</a>
+        </div>
+        <div class="footer-right">
+            <a href="#" title="X (Twitter)"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        // CONFIGURACIÓN POCKETBASE
+        const pb = new PocketBase('https://ver.pockethost.io');
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const rubro = urlParams.get('rubro') || 'general';
+
+        const titulos = {
+            'politica': 'Política',
+            'gobierno': 'Gobierno',
+            'legislatura': 'Legislatura',
+            'municipios': 'Municipios',
+            'economia': 'Economía',
+            'justicia': 'Justicia',
+            'sociedad': 'Sociedad',
+            'opinion': 'Opinión'
+        };
+        
+        const nombreSeccion = titulos[rubro] || rubro;
+        document.getElementById('titulo-seccion').innerText = nombreSeccion;
+        document.getElementById('bread-seccion').innerText = nombreSeccion;
+        document.getElementById('year').textContent = new Date().getFullYear();
+
+        async function cargarDatos() {
+            try {
+                // Feed de la sección
+                const records = await pb.collection('articulos').getList(1, 20, { 
+                    filter: `seccion="${rubro}"`, 
+                    sort: '-created' 
+                });
+
+                const feed = document.getElementById('feed-seccion');
+
+                if (records.items.length === 0) {
+                    feed.innerHTML = `
+                        <div style="padding:4rem 0; border-top:1px solid #eee;">
+                            <h3 style="color:var(--ver-dark); margin-bottom:0.5rem; font-weight:900;">Sin artículos recientes</h3>
+                            <p style="color:#777; font-weight:500;">No hay noticias publicadas en esta sección por el momento.</p>
+                        </div>`;
+                    return;
+                }
+
+                feed.innerHTML = records.items.map(item => {
+                    const imgUrl = pb.files.getUrl(item, item.imagen);
+                    const fecha = new Date(item.created).toLocaleDateString('es-ES', { day: '2-digit', month: 'long', year: 'numeric' });
+                    const autor = item.autor || 'Redacción VER';
+
+                    return `
+                    <article class="noticia-fila">
+                        <a href="noticia.html?id=${item.id}">
+                            <img src="${imgUrl}" alt="${item.titulo}" onerror="this.src='https://via.placeholder.com/800x450?text=Visión+Entre+Ríos'">
+                        </a>
+                        <div class="fila-texto">
+                            <div><span class="tag-red">${nombreSeccion}</span></div>
+                            <a href="noticia.html?id=${item.id}"><h2 class="titulo-noticia">${item.titulo}</h2></a>
+                            <p class="bajada">${item.bajada}</p>
+                            
+                            <div class="meta-info">
+                                <span class="meta-autor">Por ${autor}</span>
+                                <span>${fecha}</span>
+                            </div>
+                        </div>
+                    </article>`;
+                }).join('');
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('feed-seccion').innerHTML = '<p style="color:var(--ver-red); font-weight:bold;">Error de conexión con el servidor.</p>';
+            }
+        }
+
+        cargarDatos();
+    </script>
+</body>
+</html>

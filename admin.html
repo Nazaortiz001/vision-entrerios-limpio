@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TKZR7X2Q');</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control | Visión Entre Ríos</title>
+    
+    <link rel="icon" type="image/png" href="logotipo.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/pocketbase/dist/pocketbase.umd.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* === NUEVA PALETA CORPORATIVA PREMIUM === */
+        :root {
+            --ver-red: #cc0000;
+            --ver-red-dark: #990000;
+            --ver-black: #050505;
+            --ver-dark: #0f1115;
+            --ver-bg: #f0f2f5; 
+            --ver-white: #ffffff;
+            --ver-border: #e1e4e8;
+            --ver-text: #2d3136;
+            --font-main: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            --font-title: 'Georgia', 'Times New Roman', serif;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-main); background: var(--ver-bg); display: flex; color: var(--ver-text); min-height: 100vh; -webkit-font-smoothing: antialiased;}
+        
+        /* === SIDEBAR (Menú Lateral) === */
+        .sidebar { width: 280px; background: var(--ver-dark); height: 100vh; color: white; padding: 2.5rem 1.5rem; position: fixed; display: flex; flex-direction: column; z-index: 100; border-right: 4px solid var(--ver-red); box-shadow: 4px 0 15px rgba(0,0,0,0.1);}
+        .sidebar-logo { max-width: 80%; filter: brightness(0) invert(1); margin-bottom: 3rem; display: block; margin-left: auto; margin-right: auto; }
+        
+        .menu-label { font-size: 0.75rem; color: #777; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px; font-weight: 900; padding-left: 15px;}
+        
+        .menu-item { background: transparent; color: #a0aab2; border: none; padding: 14px 20px; text-align: left; font-size: 0.95rem; cursor: pointer; border-radius: 8px; margin-bottom: 8px; transition: all 0.3s ease; font-weight: 800; display: flex; align-items: center; gap: 12px; }
+        .menu-item i { width: 22px; text-align: center; font-size: 1.15rem; transition: transform 0.3s;}
+        .menu-item:hover { color: white; background: rgba(255,255,255,0.08); transform: translateX(5px);}
+        .menu-item.active { background: var(--ver-red); color: white; box-shadow: 0 4px 15px rgba(204,0,0,0.3);}
+        .menu-item.active i { transform: scale(1.1); }
+        
+        .logout-btn { margin-top: auto; background: rgba(255,255,255,0.05); color: #ccc; border: 1px solid rgba(255,255,255,0.1); padding: 14px; border-radius: 8px; cursor: pointer; transition: all 0.3s; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .logout-btn:hover { background: rgba(204,0,0,0.15); color: var(--ver-red); border-color: var(--ver-red); }
+
+        /* === MAIN CONTENT === */
+        .main { margin-left: 280px; padding: 3rem 4%; width: calc(100% - 280px); }
+        .section-header { margin-bottom: 2.5rem; border-bottom: 2px solid var(--ver-border); padding-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-title { font-size: 2.2rem; font-weight: 900; color: var(--ver-dark); letter-spacing: -1px; }
+        .section-subtitle { font-size: 0.95rem; color: #666; margin-top: 8px; }
+        
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* === GRID DE REDACCIÓN === */
+        .editor-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 2.5rem; }
+        
+        .card { background: white; padding: 2.5rem; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); }
+        .card-title { font-size: 1.15rem; font-weight: 900; color: var(--ver-dark); margin-bottom: 1.8rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--ver-bg); padding-bottom: 15px;}
+        .card-title i { color: var(--ver-red); font-size: 1.3rem;}
+        
+        /* Formulario Profesional */
+        .form-section { background: #fdfdfd; border: 1px solid var(--ver-border); padding: 1.8rem; border-radius: 8px; margin-bottom: 1.8rem; transition: box-shadow 0.3s;}
+        .form-section:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group:last-child { margin-bottom: 0; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } 
+        
+        label { display: block; margin-bottom: 8px; font-weight: 800; color: #444; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        input[type="text"], input[type="datetime-local"], select, textarea { width: 100%; padding: 14px 18px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.95rem; font-family: inherit; transition: all 0.3s ease; background: #fafbfc; color: #111;}
+        input[type="text"]:focus, select:focus, textarea:focus { outline: none; border-color: var(--ver-red); background: white; box-shadow: 0 0 0 4px rgba(204,0,0,0.08); }
+        textarea { height: 100px; resize: vertical; line-height: 1.5; }
+        
+        /* Opciones de expiración */
+        .radio-group { display: flex; gap: 25px; margin-bottom: 10px; }
+        .radio-group label { display: flex; align-items: center; gap: 8px; font-weight: 600; text-transform: none; letter-spacing: 0; cursor: pointer; font-size: 0.95rem; color: #555;}
+        input[type="radio"] { accent-color: var(--ver-red); transform: scale(1.3); cursor: pointer;}
+        
+        input[type="file"] { padding: 15px; background: #fafbfc; border: 2px dashed #cbd5e1; width: 100%; border-radius: 8px; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; color: #555;}
+        input[type="file"]:hover { border-color: var(--ver-red); background: #fffcfc;}
+        
+        /* Contenedor de Quill */
+        .quill-wrapper { border-radius: 6px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
+        .ql-toolbar.ql-snow { border-color: #d1d5db; background: #f8fafc; border-radius: 6px 6px 0 0; font-family: inherit; padding: 12px;}
+        .ql-container.ql-snow { border-color: #d1d5db; border-radius: 0 0 6px 6px; }
+        #editor-container { height: 450px; background: white; font-size: 1.15rem; font-family: var(--font-title); }
+        
+        /* Botones de Acción */
+        .btn-post { background: var(--ver-red); color: white; border: none; padding: 18px 30px; font-size: 1.05rem; font-weight: 900; cursor: pointer; width: 100%; border-radius: 8px; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; margin-top: 1rem; display: flex; justify-content: center; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(204, 0, 0, 0.2); }
+        .btn-post:hover { background: var(--ver-red-dark); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(204, 0, 0, 0.3); }
+        .btn-post:disabled { background: #888; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        .btn-cancel { background: white; color: var(--ver-dark); border: 2px solid #cbd5e1; padding: 16px; font-size: 0.95rem; font-weight: 800; cursor: pointer; width: 100%; border-radius: 8px; transition: all 0.3s; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .btn-cancel:hover { background: var(--ver-dark); color: white; border-color: var(--ver-dark);}
+
+        /* === VISTA PREVIA === */
+        .preview-box { background: white; padding: 0; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid rgba(0,0,0,0.05); position: sticky; top: 2rem; height: fit-content; overflow: hidden; }
+        .preview-header { display: flex; justify-content: space-between; align-items: center; background: var(--ver-dark); padding: 15px 25px; color: white; border-bottom: 3px solid var(--ver-red);}
+        .preview-tag { font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 10px; }
+        .preview-tag i { color: var(--ver-red); font-size: 1.2rem; animation: pulse-red 2s infinite;}
+        
+        @keyframes pulse-red { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        .preview-body { padding: 3rem 2.5rem; background: #ffffff;}
+        .pv-seccion-tag { display: inline-block; background-color: var(--ver-red); color: white; font-size: 0.75rem; font-weight: 900; text-transform: uppercase; padding: 5px 12px; margin-bottom: 20px; letter-spacing: 1.5px; border-radius: 3px;}
+        .pv-titulo { font-size: 2.5rem; line-height: 1.1; margin-bottom: 1.2rem; font-weight: 900; color: var(--ver-dark); letter-spacing: -1px; word-wrap: break-word; font-family: var(--font-main); }
+        .pv-bajada { font-size: 1.2rem; color: #444; font-weight: 500; margin-bottom: 2rem; line-height: 1.6; word-wrap: break-word; font-style: italic; font-family: var(--font-title);}
+        
+        .pv-meta { font-size: 0.85rem; color: #888; margin-bottom: 2rem; border-top: 1px solid var(--ver-border); border-bottom: 1px solid var(--ver-border); padding: 12px 0; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; font-family: var(--font-main);}
+        .pv-meta b { color: var(--ver-dark); font-weight: 900; }
+        
+        .pv-imagen { width: 100%; height: 280px; object-fit: cover; background: #f4f5f7; border-radius: 6px; margin-bottom: 2.5rem; display: flex; align-items: center; justify-content: center; color: #aaa; font-size: 1rem; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05);}
+        .pv-imagen img { width: 100%; height: 100%; object-fit: cover; opacity: 0.95; }
+        
+        .pv-contenido { font-size: 1.15rem; color: #222; line-height: 1.8; max-height: 350px; overflow-y: auto; padding-right: 15px; font-family: var(--font-title);}
+        .pv-contenido > p:first-of-type::first-letter { float: left; font-size: 4rem; line-height: 0.8; padding-top: 0.1em; padding-right: 0.1em; color: var(--ver-red); font-weight: 900; font-family: var(--font-main);}
+
+        /* === GESTOR DE NOTICIAS (TABLA) === */
+        .table-container { background: white; border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.05); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; min-width: 900px; }
+        th, td { padding: 20px 25px; border-bottom: 1px solid var(--ver-border); vertical-align: middle; }
+        th { background: #fafbfc; font-weight: 900; color: #555; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1px; }
+        tr { transition: background 0.2s ease;}
+        tr:hover { background: #fcfcfc; }
+        .td-img { width: 80px; height: 55px; object-fit: cover; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .td-titulo { font-weight: 900; color: var(--ver-dark); margin-bottom: 6px; display: block; font-size: 1rem; line-height: 1.3; }
+        .td-meta { font-size: 0.8rem; color: #666; font-weight: 600; }
+        .td-badge { font-size: 0.7rem; padding: 5px 10px; border-radius: 4px; text-transform: uppercase; font-weight: 900; display: inline-block; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .td-badge.seccion { background: #f0f2f5; color: var(--ver-dark); border: 1px solid #d1d5db; margin-left: 5px; }
+        .td-badge.urgente { background: var(--ver-red); color: white; box-shadow: 0 2px 5px rgba(204,0,0,0.3);}
+        .td-badge.relevante { background: var(--ver-dark); color: white; }
+        .td-views { font-weight: 900; color: var(--ver-dark); font-size: 1.1rem; }
+        
+        .action-buttons { display: flex; gap: 10px; }
+        .btn-edit { background: white; color: var(--ver-dark); border: 1px solid #cbd5e1; padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+        .btn-edit:hover { background: #f8fafc; border-color: var(--ver-dark); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05);}
+        .btn-delete { background: white; color: var(--ver-red); border: 1px solid rgba(204,0,0,0.3); padding: 10px 14px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
+        .btn-delete:hover { background: #fffcfc; border-color: var(--ver-red); transform: translateY(-2px); box-shadow: 0 4px 8px rgba(204,0,0,0.1);}
+        
+        /* === LOGIN OVERLAY === */
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(5, 5, 5, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+        .login-box { background: white; padding: 4rem; border-radius: 16px; width: 450px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.5); border-top: 6px solid var(--ver-red); }
+        .login-box img { max-width: 180px; margin-bottom: 2rem; display: block; margin-left: auto; margin-right: auto; background-color: var(--ver-dark); padding: 15px; border-radius: 8px;}
+        .login-box h3 { margin-bottom: 2.5rem; color: var(--ver-dark); font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-size: 1.3rem; }
+        .login-box .form-group { margin-bottom: 1.8rem; }
+        .login-box input { padding: 16px 20px; font-size: 1.05rem; background: #f4f5f7; border: 1px solid #e1e4e8; border-radius: 8px;}
+        .login-box input:focus { background: white; border-color: var(--ver-red); box-shadow: 0 0 0 4px rgba(204,0,0,0.1);}
+        .login-box .btn-post { margin-top: 2.5rem; padding: 18px; font-size: 1.1rem; border-radius: 8px;}
+
+        /* Scrollbar Profesional */
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: #f0f2f5; }
+        ::-webkit-scrollbar-thumb { background: #c1c5c9; border-radius: 5px; border: 2px solid #f0f2f5;}
+        ::-webkit-scrollbar-thumb:hover { background: #a0aab2; }
+
+        /* === RESPONSIVE MOVILE === */
+        @media (max-width: 1024px) {
+            body { flex-direction: column; }
+            .sidebar { position: relative; width: 100%; height: auto; flex-direction: row; flex-wrap: wrap; padding: 1.5rem 4%; align-items: center; justify-content: space-between; border-right: none; border-bottom: 4px solid var(--ver-red); }
+            .sidebar-logo { margin-bottom: 0; max-height: 45px; background: transparent; padding:0;}
+            .menu-label { display: none; }
+            .menu-item { margin-bottom: 0; padding: 12px 18px; font-size: 0.95rem; border-radius: 6px;}
+            .logout-btn { margin-top: 0; padding: 12px 18px; border: none; }
+            .main { margin-left: 0; width: 100%; padding: 2.5rem 4%; }
+            .editor-grid { grid-template-columns: 1fr; }
+            .preview-box { position: relative; top: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar { flex-direction: column; gap: 15px; align-items: stretch; padding: 2rem 5%; }
+            .sidebar-logo { align-self: center; margin-bottom: 10px; }
+            .menu-item, .logout-btn { width: 100%; justify-content: center; }
+            .section-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .section-title { font-size: 1.8rem; }
+            .form-row { grid-template-columns: 1fr; gap: 15px; } 
+            .login-box { width: 92%; padding: 2.5rem 2rem; }
+            .card { padding: 1.5rem; }
+            .preview-body { padding: 2rem 1.5rem; }
+            #editor-container { height: 350px; } 
+            .pv-titulo { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TKZR7X2Q"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <div id="login-overlay">
+        <div class="login-box">
+            <img src="logotipo.png" alt="VER Logo">
+            <h3>Acceso Seguro al CMS</h3>
+            <div class="form-group">
+                <input type="email" id="email" placeholder="Correo institucional" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <input type="password" id="pass" placeholder="Contraseña de acceso" autocomplete="current-password" onkeypress="if(event.key === 'Enter') login()">
+            </div>
+            <button id="btn-login" class="btn-post" onclick="login()"><i class="fa-solid fa-shield-halved"></i> Ingresar al Sistema</button>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <img src="logotipo.png" alt="VER Logo" class="sidebar-logo">
+        
+        <div class="menu-label">Módulos de Sistema</div>
+        <div style="display: flex; flex-direction: column; flex-grow: 1;">
+            <button class="menu-item active" onclick="switchTab('redaccion')">
+                <i class="fa-solid fa-pen-nib"></i> Sala de Redacción
+            </button>
+            <button class="menu-item" onclick="switchTab('gestion')">
+                <i class="fa-solid fa-layer-group"></i> Gestor de Contenidos
+            </button>
+            <button class="menu-item" onclick="switchTab('urgentes')">
+                <i class="fa-solid fa-bolt" style="color: var(--ver-red);"></i> Alertas Urgentes
+            </button>
+        </div>
+        
+        <button class="logout-btn" onclick="logout()">
+            <i class="fa-solid fa-power-off"></i> Cerrar Sesión
+        </button>
+    </div>
+
+    <div class="main">
+        
+        <div id="tab-redaccion" class="tab-content active">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title" id="form-title">Nueva Publicación</h1>
+                    <p class="section-subtitle">Complete los campos para redactar y publicar una noticia en vivo.</p>
+                </div>
+            </div>
+
+            <div class="editor-grid">
+                
+                <div class="card">
+                    <form id="news-form">
+                        
+                        <div class="form-section">
+                            <div class="card-title"><i class="fa-solid fa-tags"></i> Ubicación y Categoría</div>
+                            <div class="form-row">
+                                <div>
+                                    <label>Categoría Visual (Portada)</label>
+                                    <select id="categoria">
+                                        <option value="relevante">Destacada Principal (Tapa)</option>
+                                        <option value="comun">Noticia Común (Feed / Secciones)</option>
+                                        <option value="evento">Evento de Agenda Provincial</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Rubro Temático</label>
+                                    <select id="seccion">
+                                        <option value="politica">Política</option>
+                                        <option value="gobierno">Gobierno</option>
+                                        <option value="legislatura">Legislatura</option>
+                                        <option value="municipios">Municipios</option>
+                                        <option value="economia">Economía</option>
+                                        <option value="justicia">Justicia</option>
+                                        <option value="seguridad">Seguridad</option>
+                                        <option value="deportes">Deportes</option>
+                                        <option value="sociedad">Sociedad</option>
+                                        <option value="opinion">Opinión</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="card-title"><i class="fa-solid fa-newspaper"></i> Contenido de la Noticia</div>
+                            
+                            <div class="form-group">
+                                <label id="label-titulo">Titular Principal</label>
+                                <input type="text" id="titulo" required placeholder="Ej: Se debatió la reforma en la Legislatura entrerriana...">
+                            </div>
+
+                            <div class="form-row form-group">
+                                <div>
+                                    <label>Firma / Periodista</label>
+                                    <input type="text" id="autor" required placeholder="Ej: Marcos Rodríguez..." value="Redacción VER">
+                                </div>
+                                <div>
+                                    <label>Fuente (Opcional)</label>
+                                    <input type="text" id="fuente" placeholder="Ej: Corresponsalía, Télam...">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Bajada / Copete</label>
+                                <textarea id="bajada" required placeholder="Resumen corto que acompaña al título (aprox. 2 líneas de contexto)..."></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-section">
+                            <div class="card-title"><i class="fa-solid fa-image"></i> Archivos y Visibilidad</div>
+                            
+                            <div class="form-group">
+                                <label>Imagen de Portada (Alta Calidad)</label>
+                                <input type="file" id="imagen" accept="image/*" required onchange="previewImage(event)">
+                                <small id="img-edit-hint" style="display:none; color:#666; margin-top:10px; font-weight:bold; background:#eee; padding:8px 12px; border-radius:4px;"><i class="fa-solid fa-circle-info"></i> Deja este campo vacío para mantener la imagen original.</small>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 1.5rem;">
+                                <label>Duración en el portal</label>
+                                <div class="radio-group">
+                                    <label><input type="radio" name="duracion" value="permanente" checked onchange="toggleExpiracion(false)"> Permanente</label>
+                                    <label><input type="radio" name="duracion" value="temporal" onchange="toggleExpiracion(true)"> Con vencimiento automático</label>
+                                </div>
+                                <input type="datetime-local" id="fecha-expiracion" style="display: none; margin-top: 15px;">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label style="font-size: 0.95rem; margin-bottom: 12px;"><i class="fa-solid fa-align-left" style="color:var(--ver-red);"></i> Desarrollo Completo de la Noticia</label>
+                            <div class="quill-wrapper">
+                                <div id="editor-container"></div>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="btn-submit" class="btn-post"><i class="fa-solid fa-cloud-arrow-up"></i> Publicar Artículo en Vivo</button>
+                        <button type="button" id="btn-cancel" class="btn-cancel" style="display: none;" onclick="cancelarEdicion()"><i class="fa-solid fa-xmark"></i> Cancelar Edición</button>
+                    </form>
+                </div>
+
+                <div class="preview-box">
+                    <div class="preview-header">
+                        <span class="preview-tag"><i class="fa-solid fa-circle-dot"></i> Emulador de Portada</span>
+                        <span style="font-size:0.75rem; color:#ccc;"><i class="fa-solid fa-desktop"></i> Desktop View</span>
+                    </div>
+                    <div class="preview-body">
+                        <div id="pv-seccion" class="pv-seccion-tag">POLÍTICA</div>
+                        <h2 class="pv-titulo" id="pv-titulo">El titular de tu noticia aparecerá aquí adaptado a la tipografía del sitio...</h2>
+                        <p class="pv-bajada" id="pv-bajada">A medida que escribas la bajada, podrás ver cómo se lee visualmente. Es el contexto que atrapa al lector antes de hacer scroll.</p>
+                        
+                        <div class="pv-meta" id="pv-meta">Por <b>Redacción VER</b> | <span id="pv-fuente">Fuente Propia</span></div>
+
+                        <div class="pv-imagen" id="pv-imagen-container">
+                            <span style="text-align:center; color:#888;"><i class="fa-regular fa-image" style="font-size: 2.5rem; margin-bottom:10px; display:block;"></i>Esperando imagen...</span>
+                        </div>
+                        
+                        <div class="pv-contenido" id="pv-contenido">
+                            <p style="color:#aaa; font-style:italic;">El desarrollo completo de tu texto, con sus enlaces e imágenes interiores, se visualizará en este espacio con formato periodístico...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-gestion" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title">Base de Datos de Noticias</h1>
+                    <p class="section-subtitle">Gestione, edite o elimine las publicaciones históricas del portal con un solo clic.</p>
+                </div>
+                <button onclick="cargarNoticiasTabla()" style="padding: 12px 24px; background: white; border: 2px solid var(--ver-dark); border-radius: 6px; cursor: pointer; font-weight: 800; display:flex; align-items:center; gap:10px; transition:all 0.3s; color:var(--ver-dark);" onmouseover="this.style.background='var(--ver-dark)'; this.style.color='white';" onmouseout="this.style.background='white'; this.style.color='var(--ver-dark)';">
+                    <i class="fa-solid fa-rotate-right"></i> Sincronizar Datos
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 90px;">Portada</th>
+                            <th>Titular y Metadatos</th>
+                            <th>Ubicación Visual</th>
+                            <th>Lecturas</th>
+                            <th>Publicación</th>
+                            <th style="text-align: right;">Acciones de Edición</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-noticias">
+                        <tr><td colspan="6" style="text-align: center; padding: 4rem; color: #888; font-weight: bold; font-size: 1.1rem;"><i class="fa-solid fa-circle-notch fa-spin" style="margin-right:12px; color:var(--ver-red); font-size:1.5rem;"></i> Conectando con el servidor PocketBase...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="tab-urgentes" class="tab-content">
+            <div class="section-header">
+                <div>
+                    <h1 class="section-title" style="color:var(--ver-red);"><i class="fa-solid fa-bolt" style="margin-right:10px;"></i> Alertas de Último Momento</h1>
+                    <p class="section-subtitle">Añada, edite o elimine los textos que giran infinitamente en la barra superior (marquesina) del sitio.</p>
+                </div>
+            </div>
+
+            <div class="editor-grid">
+                
+                <div class="card" style="border-top: 4px solid var(--ver-red);">
+                    <div class="card-title"><i class="fa-solid fa-keyboard"></i> Redactor Veloz de Alerta</div>
+                    <form id="urgente-form">
+                        <div class="form-group">
+                            <label>Texto de la Alerta (Aparecerá en letras blancas sobre rojo)</label>
+                            <input type="text" id="titulo-urgente" required placeholder="Ej: ALERTA: Se debaten cambios clave en la sesión de hoy..." style="font-size: 1.1rem; padding: 18px;">
+                        </div>
+                        <button type="submit" id="btn-submit-urgente" class="btn-post" style="background:var(--ver-dark);"><i class="fa-solid fa-paper-plane"></i> Enviar a la Marquesina Ahora</button>
+                        <button type="button" id="btn-cancel-urgente" class="btn-cancel" style="display: none;" onclick="cancelarEdicionUrgente()"><i class="fa-solid fa-xmark"></i> Descartar Cambios</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-title"><i class="fa-solid fa-satellite-dish"></i> Alertas Transmitiendo en Vivo</div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Texto en Vivo</th>
+                                    <th style="text-align: right;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-urgentes">
+                                <tr><td colspan="2" style="text-align: center; color: #888; padding:2rem;">Cargando...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // CONFIGURACIÓN POCKETBASE
+        const pb = new PocketBase('https://ver.pockethost.io'); 
+        
+        let currentEditId = null; 
+        let currentUrgenteEditId = null;
+        let allArticlesData = []; 
+
+        // 1. INICIALIZAR QUILL.JS
+        var quill = new Quill('#editor-container', {
+            theme: 'snow',
+            placeholder: ' Comienza a escribir el artículo periodístico aquí...',
+            modules: {
+                toolbar: [
+                    [{ 'header': [2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                    ['link', 'blockquote'],
+                    ['clean']
+                ]
+            }
+        });
+
+        // 2. SISTEMA DE LOGIN Y SEGURIDAD OPTIMIZADO
+        if (pb.authStore.isValid) {
+            document.getElementById('login-overlay').style.display = 'none';
+            cargarNoticiasTabla(); 
+        }
+
+        async function login() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('pass').value;
+            const btn = document.getElementById('btn-login');
+
+            if (!email || !pass) {
+                Swal.fire({ icon: 'warning', title: 'Campos Vacíos', text: 'Por favor, ingresá tu correo y contraseña.', confirmButtonColor: 'var(--ver-dark)'});
+                return;
+            }
+
+            // Muestra estado de carga interactivo en el botón
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Autenticando...';
+            btn.disabled = true;
+
+            try {
+                // INTENTO 1: Buscar en tabla general de Usuarios
+                await pb.collection('users').authWithPassword(email, pass);
+                Swal.fire({ icon: 'success', title: 'Acceso Autorizado', text: 'Conexión segura establecida.', timer: 1500, showConfirmButton: false }).then(() => { location.reload(); });
+            } catch (e1) {
+                try {
+                    // INTENTO 2 (FALLBACK DE SEGURIDAD): Buscar en tabla privada de Admins (Dueños)
+                    await pb.admins.authWithPassword(email, pass);
+                    Swal.fire({ icon: 'success', title: 'Acceso Master Autorizado', text: 'Bienvenido, Administrador.', timer: 1500, showConfirmButton: false }).then(() => { location.reload(); });
+                } catch(e2) {
+                    console.error("Auth error:", e1, e2);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    Swal.fire({ icon: 'error', title: 'Acceso Denegado', text: 'Credenciales inválidas. Revisá tu email y contraseña.', confirmButtonColor: 'var(--ver-red)' });
+                }
+            }
+        }
+
+        function logout() {
+            pb.authStore.clear();
+            location.reload();
+        }
+
+        // 3. CAMBIO DE PESTAÑAS (TABS)
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if(tabName === 'gestion') cargarNoticiasTabla();
+            if(tabName === 'urgentes') cargarUrgentesTabla();
+        }
+
+        function toggleExpiracion(isTemporal) {
+            const inputFecha = document.getElementById('fecha-expiracion');
+            if(isTemporal) {
+                inputFecha.style.display = 'block';
+                inputFecha.required = true;
+            } else {
+                inputFecha.style.display = 'none';
+                inputFecha.required = false;
+                inputFecha.value = '';
+            }
+        }
+
+        // VISTA PREVIA LÓGICA
+        const tituloInput = document.getElementById('titulo');
+        const bajadaInput = document.getElementById('bajada');
+        const seccionSelect = document.getElementById('seccion');
+        const autorInput = document.getElementById('autor');
+        const fuenteInput = document.getElementById('fuente');
+
+        tituloInput.addEventListener('input', () => { document.getElementById('pv-titulo').innerText = tituloInput.value || 'El titular de tu noticia aparecerá aquí adaptado a la tipografía del sitio...'; });
+        bajadaInput.addEventListener('input', () => { document.getElementById('pv-bajada').innerText = bajadaInput.value || 'A medida que escribas la bajada, podrás ver cómo se lee visualmente. Es el contexto que atrapa al lector antes de hacer scroll.'; });
+        
+        seccionSelect.addEventListener('change', () => {
+            document.getElementById('pv-seccion').innerText = seccionSelect.options[seccionSelect.selectedIndex].text;
+        });
+        
+        const updateMeta = () => {
+            const aut = autorInput.value || 'Redacción VER';
+            const fue = fuenteInput.value ? ` | Fuente: ${fuenteInput.value}` : '';
+            document.getElementById('pv-meta').innerHTML = `Por <b>${aut}</b>${fue}`;
+        };
+        autorInput.addEventListener('input', updateMeta);
+        fuenteInput.addEventListener('input', updateMeta);
+        
+        quill.on('text-change', function() {
+            const text = quill.getText().trim();
+            document.getElementById('pv-contenido').innerHTML = text.length > 0 ? quill.root.innerHTML : '<p style="color:#aaa; font-style:italic;">El desarrollo completo de tu texto, con sus enlaces e imágenes interiores, se visualizará en este espacio con formato periodístico...</p>';
+        });
+
+        function previewImage(event) {
+            const reader = new FileReader();
+            reader.onload = function() {
+                document.getElementById('pv-imagen-container').innerHTML = `<img src="${reader.result}" alt="Preview" style="width:100%; height:100%; object-fit:cover;">`;
+            }
+            if(event.target.files[0]) reader.readAsDataURL(event.target.files[0]);
+        }
+
+        // 4. PREPARAR EDICIÓN DE NOTICIA (Panel General)
+        function prepararEdicion(id) {
+            const articulo = allArticlesData.find(a => a.id === id);
+            if(!articulo) return;
+
+            currentEditId = id;
+            
+            document.getElementById('titulo').value = articulo.titulo;
+            document.getElementById('categoria').value = articulo.categoria;
+            document.getElementById('seccion').value = articulo.seccion || 'politica';
+            document.getElementById('bajada').value = articulo.bajada;
+            
+            document.getElementById('autor').value = articulo.autor || 'Redacción VER';
+            document.getElementById('fuente').value = articulo.fuente || '';
+            
+            quill.root.innerHTML = articulo.contenido;
+            
+            document.getElementById('imagen').required = false;
+            document.getElementById('img-edit-hint').style.display = 'block';
+
+            if(articulo.imagen) {
+                const imgUrl = pb.files.getUrl(articulo, articulo.imagen);
+                document.getElementById('pv-imagen-container').innerHTML = `<img src="${imgUrl}" alt="Preview" style="width:100%; height:100%; object-fit:cover;">`;
+            } else {
+                document.getElementById('pv-imagen-container').innerHTML = `<span style="text-align:center; color:#888;"><i class="fa-regular fa-image" style="font-size: 2.5rem; margin-bottom:10px; display:block;"></i>Sin imagen guardada</span>`;
+            }
+
+            document.getElementById('form-title').innerText = "Editando Publicación";
+            document.getElementById('btn-submit').innerHTML = "<i class='fa-solid fa-floppy-disk'></i> Sobreescribir Cambios";
+            document.getElementById('btn-submit').style.background = "var(--ver-dark)";
+            document.getElementById('btn-cancel').style.display = "flex";
+
+            tituloInput.dispatchEvent(new Event('input'));
+            bajadaInput.dispatchEvent(new Event('input'));
+            seccionSelect.dispatchEvent(new Event('change'));
+            updateMeta();
+
+            switchTab('redaccion');
+            document.querySelector('.menu-item[onclick="switchTab(\'redaccion\')"]').classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function cancelarEdicion() {
+            currentEditId = null;
+            document.getElementById('news-form').reset();
+            quill.setContents([]);
+            document.getElementById('imagen').required = true;
+            document.getElementById('img-edit-hint').style.display = 'none';
+            
+            document.getElementById('autor').value = 'Redacción VER';
+            document.getElementById('fuente').value = '';
+            document.getElementById('seccion').value = 'politica';
+            
+            document.getElementById('form-title').innerText = "Nueva Publicación";
+            document.getElementById('btn-submit').innerHTML = "<i class='fa-solid fa-cloud-arrow-up'></i> Publicar Artículo en Vivo";
+            document.getElementById('btn-submit').style.background = "var(--ver-red)";
+            document.getElementById('btn-cancel').style.display = "none";
+
+            document.getElementById('pv-imagen-container').innerHTML = '<span style="text-align:center; color:#888;"><i class="fa-regular fa-image" style="font-size: 2.5rem; margin-bottom:10px; display:block;"></i>Esperando imagen...</span>';
+            tituloInput.dispatchEvent(new Event('input'));
+            bajadaInput.dispatchEvent(new Event('input'));
+            seccionSelect.dispatchEvent(new Event('change'));
+            updateMeta();
+        }
+
+        // 5. ENVIAR FORMULARIO (Noticias Normales)
+        document.getElementById('news-form').onsubmit = async (e) => {
+            e.preventDefault();
+            
+            if(quill.getText().trim().length === 0) {
+                Swal.fire({ icon: 'warning', title: 'Cuerpo Vacío', text: 'El desarrollo de la noticia no puede estar en blanco.', confirmButtonColor: 'var(--ver-dark)'});
+                return;
+            }
+
+            Swal.fire({ title: currentEditId ? 'Procesando cambios...' : 'Lanzando a la web...', text: 'Sincronizando con el servidor central', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }});
+            
+            const formData = new FormData();
+            formData.append('titulo', document.getElementById('titulo').value);
+            formData.append('categoria', document.getElementById('categoria').value);
+            formData.append('seccion', document.getElementById('seccion').value);
+            formData.append('bajada', document.getElementById('bajada').value);
+            formData.append('contenido', quill.root.innerHTML);
+            formData.append('autor', document.getElementById('autor').value);
+            formData.append('fuente', document.getElementById('fuente').value);
+
+            if (document.getElementById('imagen').files.length > 0) {
+                formData.append('imagen', document.getElementById('imagen').files[0]);
+            }
+
+            const isTemporal = document.querySelector('input[name="duracion"]:checked').value === 'temporal';
+            if(isTemporal && document.getElementById('fecha-expiracion').value) {
+                const dateVal = new Date(document.getElementById('fecha-expiracion').value);
+                formData.append('expiracion', dateVal.toISOString());
+            }
+
+            try {
+                if (currentEditId) {
+                    await pb.collection('articulos').update(currentEditId, formData);
+                    Swal.fire({ icon: 'success', title: '¡Actualización Exitosa!', text: 'Los cambios ya están reflejados en el portal.', confirmButtonColor: 'var(--ver-dark)' });
+                } else {
+                    await pb.collection('articulos').create(formData);
+                    Swal.fire({ icon: 'success', title: '¡Publicado con Éxito!', text: 'El artículo ya está disponible para los lectores.', confirmButtonColor: 'var(--ver-red)' });
+                }
+                cancelarEdicion(); 
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Fallo de Servidor', html: `Detalle del sistema: ${error.message}`, confirmButtonColor: 'var(--ver-dark)' });
+            }
+        };
+
+        // 6. CARGAR TABLA GENERAL
+        async function cargarNoticiasTabla() {
+            const tbody = document.getElementById('tabla-noticias');
+            try {
+                allArticlesData = await pb.collection('articulos').getFullList({ filter: 'categoria!="urgente"', sort: '-created' });
+                
+                if(allArticlesData.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 3rem; color:#666;">La base de datos de artículos se encuentra vacía.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = ''; 
+                
+                allArticlesData.forEach(item => {
+                    const imgUrl = item.imagen ? pb.files.getUrl(item, item.imagen, {'thumb': '100x100'}) : 'https://via.placeholder.com/80x55?text=S/I';
+                    const fecha = new Date(item.created).toLocaleDateString('es-ES', {day:'2-digit', month:'short', year:'numeric'});
+                    const vistas = item.vistas || 0; 
+                    const autorTabla = item.autor ? `<i class="fa-solid fa-pen-nib" style="font-size:0.6rem; color:#aaa;"></i> ${item.autor}` : 'Sin firma';
+                    const seccionTxt = item.seccion ? item.seccion : 'General';
+                    
+                    let badgeClass = 'td-badge';
+                    if(item.categoria === 'relevante') badgeClass = 'td-badge relevante';
+                    if(item.categoria === 'evento') badgeClass = 'td-badge' + ' style="background:var(--ver-red); color:white;"';
+                    
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><img src="${imgUrl}" class="td-img" onerror="this.src='https://via.placeholder.com/80x55?text=S/I'"></td>
+                            <td>
+                                <span class="td-titulo">${item.titulo}</span>
+                                <span class="td-meta">${autorTabla}</span>
+                            </td>
+                            <td>
+                                <span class="${badgeClass}">${item.categoria}</span><br>
+                                <span class="td-badge seccion"><i class="fa-regular fa-folder-open" style="margin-right:4px;"></i> ${seccionTxt}</span>
+                            </td>
+                            <td class="td-views"><i class="fa-regular fa-eye" style="color:#aaa; margin-right:5px;"></i> ${vistas}</td>
+                            <td style="color:#555; font-size:0.85rem;"><i class="fa-regular fa-calendar" style="color:#aaa; margin-right:5px;"></i> ${fecha}</td>
+                            <td style="text-align:right;">
+                                <div class="action-buttons" style="justify-content:flex-end;">
+                                    <button class="btn-edit" title="Editar Artículo" onclick="prepararEdicion('${item.id}')"><i class="fa-solid fa-pen"></i> Editar</button>
+                                    <button class="btn-delete" title="Eliminar Definitivamente" onclick="borrarNoticia('${item.id}', '${item.titulo.replace(/'/g, "\\'")}')"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--ver-red); padding: 3rem; font-weight:bold;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:10px;"></i> Error al contactar la base de datos de PocketBase.</td></tr>';
+            }
+        }
+
+        // 7. BORRAR NOTICIA GENERAL
+        function borrarNoticia(id, titulo) {
+            Swal.fire({
+                title: '¿Eliminar publicación?', html: `Cuidado, esta acción es irreversible. El artículo será borrado de los servidores:<br><br><b style="color:var(--ver-dark); font-size:1.1rem;">"${titulo}"</b>`, icon: 'warning',
+                showCancelButton: true, confirmButtonColor: 'var(--ver-red)', cancelButtonColor: '#666', confirmButtonText: '<i class="fa-solid fa-trash-can"></i> Sí, eliminar', cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        await pb.collection('articulos').delete(id);
+                        Swal.fire({ icon: 'success', title: 'Eliminado', text: 'El registro fue borrado de la nube.', timer: 2000, showConfirmButton: false });
+                        cargarNoticiasTabla(); 
+                    } catch (error) {
+                        Swal.fire('Error', 'Problema al intentar eliminar: ' + error.message, 'error');
+                    }
+                }
+            });
+        }
+
+        // ==========================================
+        // 8. LÓGICA DEL PANEL DE ALERTAS URGENTES
+        // ==========================================
+
+        document.getElementById('urgente-form').onsubmit = async (e) => {
+            e.preventDefault();
+            Swal.fire({ title: currentUrgenteEditId ? 'Sobreescribiendo...' : 'Enviando alerta en vivo...', text: 'Sincronizando marquesina', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }});
+            
+            const formData = new FormData();
+            formData.append('titulo', document.getElementById('titulo-urgente').value);
+            
+            try {
+                if (currentUrgenteEditId) {
+                    await pb.collection('articulos').update(currentUrgenteEditId, formData);
+                    Swal.fire({ icon: 'success', title: 'Alerta Actualizada', text: 'El texto ya cambió en la barra pública.', confirmButtonColor: 'var(--ver-dark)' });
+                } else {
+                    formData.append('categoria', 'urgente');
+                    formData.append('seccion', 'general');
+                    formData.append('bajada', 'Alerta de último momento');
+                    formData.append('contenido', '<p>Alerta publicada en marquesina.</p>');
+                    formData.append('autor', 'Sistema VER');
+                    
+                    await pb.collection('articulos').create(formData);
+                    Swal.fire({ icon: 'success', title: 'Alerta Lanzada', text: 'La marquesina está girando en vivo.', confirmButtonColor: 'var(--ver-red)' });
+                }
+                cancelarEdicionUrgente();
+                cargarUrgentesTabla();
+            } catch (error) {
+                Swal.fire({ icon: 'error', title: 'Fallo Técnico', html: error.message });
+            }
+        };
+
+        function prepararEdicionUrgente(id, titulo) {
+            currentUrgenteEditId = id;
+            document.getElementById('titulo-urgente').value = titulo;
+            document.getElementById('btn-submit-urgente').innerHTML = "<i class='fa-solid fa-floppy-disk'></i> Sobreescribir Alerta";
+            document.getElementById('btn-submit-urgente').style.background = "var(--ver-dark)";
+            document.getElementById('btn-cancel-urgente').style.display = "flex";
+        }
+
+        function cancelarEdicionUrgente() {
+            currentUrgenteEditId = null;
+            document.getElementById('urgente-form').reset();
+            document.getElementById('btn-submit-urgente').innerHTML = "<i class='fa-solid fa-paper-plane'></i> Enviar a la Marquesina Ahora";
+            document.getElementById('btn-submit-urgente').style.background = "var(--ver-dark)";
+            document.getElementById('btn-cancel-urgente').style.display = "none";
+        }
+
+        async function cargarUrgentesTabla() {
+            const tbody = document.getElementById('tabla-urgentes');
+            try {
+                const records = await pb.collection('articulos').getFullList({ filter: 'categoria="urgente"', sort: '-created' });
+                if(records.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding: 3rem; color: #888; font-style:italic;">No hay ninguna alerta activa. La barra pública permanecerá oculta.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = records.map(item => `
+                    <tr style="border-left: 3px solid var(--ver-red);">
+                        <td style="font-weight:900; color:var(--ver-dark); font-size:1.05rem; padding-left: 20px;"><i class="fa-solid fa-circle" style="color:var(--ver-red); font-size:0.5rem; margin-right:10px; vertical-align:middle;"></i>${item.titulo}</td>
+                        <td style="text-align:right;">
+                            <div class="action-buttons" style="justify-content:flex-end;">
+                                <button type="button" class="btn-edit" title="Modificar texto" onclick="prepararEdicionUrgente('${item.id}', '${item.titulo.replace(/'/g, "\\'")}')"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" class="btn-delete" title="Apagar alerta" onclick="borrarUrgente('${item.id}')"><i class="fa-solid fa-power-off"></i> Quitar</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(e) {
+                tbody.innerHTML = '<tr><td colspan="2" style="color:var(--ver-red); text-align:center;">Fallo de conexión al cargar alertas.</td></tr>';
+            }
+        }
+
+        function borrarUrgente(id) {
+            Swal.fire({
+                title: '¿Apagar Alerta?', text:'La marquesina dejará de mostrar este mensaje en la web.', icon: 'warning',
+                showCancelButton: true, confirmButtonColor: 'var(--ver-red)', cancelButtonColor: '#666', confirmButtonText: '<i class="fa-solid fa-power-off"></i> Apagar', cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await pb.collection('articulos').delete(id);
+                    cargarUrgentesTabla();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
