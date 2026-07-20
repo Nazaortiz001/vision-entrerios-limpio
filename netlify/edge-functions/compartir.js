@@ -1,36 +1,51 @@
 export default async (request, context) => {
-    const url = new URL(request.url);
-    const id = url.searchParams.get("id");
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id");
 
-    // Si entran sin ID, cargamos la página normal sin tocar nada
-    if (!id) return context.next();
+  if (!id) {
+    return Response.redirect("https://visionentrerios.com.ar/", 302);
+  }
 
-    try {
-        // 1. Buscamos la noticia en tu PocketBase PAGO (Respuesta inmediata)
-        const pbReq = await fetch(`https://ver.pockethost.io/api/collections/articulos/records/${id}`);
-        if (!pbReq.ok) return context.next();
-        
-        const articulo = await pbReq.json();
+  // Ahora guardamos la URL de destino al principio
+  const urlDestino = `https://visionentrerios.com.ar/noticia.html?id=${id}`;
 
-        // 2. Agarramos tu archivo noticia.html original
-        const response = await context.next();
-        let html = await response.text();
-
-        // 3. Inyectamos la foto y el título exacto de la noticia a la fuerza
-        if (articulo.imagen) {
-            const imgUrl = `https://ver.pockethost.io/api/files/${articulo.collectionId}/${articulo.id}/${articulo.imagen}?thumb=800x600`;
-            
-            html = html.replace(/<meta property="og:title" content="[^"]*">/i, `<meta property="og:title" content="${articulo.titulo}">`);
-            html = html.replace(/<meta property="og:description" content="[^"]*">/i, `<meta property="og:description" content="${articulo.bajada}">`);
-            html = html.replace(/<meta property="og:image" content="[^"]*">/i, `<meta property="og:image" content="${imgUrl}">`);
-        }
-
-        // 4. Le servimos la web perfecta a WhatsApp
-        return new Response(html, {
-            headers: { "content-type": "text/html;charset=UTF-8" },
-        });
-    } catch (error) {
-        // Si hay un error, carga la web normal para que NUNCA de 404
-        return context.next();
+  try {
+    const respuesta = await fetch(`https://ver.pockethost.io/api/collections/articulos/records/${id}`);
+    
+    // CAMBIO CLAVE: Si Pocketbase nos bloquea, te manda a la noticia igual, nunca al inicio.
+    if (!respuesta.ok) {
+      return Response.redirect(urlDestino, 302);
     }
+
+    const noticia = await respuesta.json();
+    const titulo = noticia.titulo;
+    const bajada = noticia.bajada || "Visión Entre Ríos - Periodismo Político y Actualidad";
+    const imagenUrl = `https://ver.pockethost.io/api/files/articulos/${id}/${noticia.imagen}`;
+
+    return new Response(`
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>${titulo}</title>
+        <meta property="og:title" content="${titulo}" />
+        <meta property="og:description" content="${bajada}" />
+        <meta property="og:image" content="${imagenUrl}" />
+        <meta property="og:url" content="${request.url}" />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image">
+        <meta http-equiv="refresh" content="0;url=${urlDestino}">
+      </head>
+      <body>
+        <script>window.location.href = "${urlDestino}";</script>
+      </body>
+      </html>
+    `, {
+      headers: { "content-type": "text/html;charset=UTF-8" }
+    });
+
+  } catch (error) {
+    // Si hay cualquier error raro, te manda a la noticia
+    return Response.redirect(urlDestino, 302);
+  }
 };
