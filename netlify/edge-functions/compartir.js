@@ -1,51 +1,64 @@
 export default async (request, context) => {
-  const url = new URL(request.url);
-  const id = url.searchParams.get("id");
+    const url = new URL(request.url);
+    const id = url.searchParams.get("id");
 
-  if (!id) {
-    return Response.redirect("https://visionentrerios.com.ar/", 302);
-  }
-
-  // Ahora guardamos la URL de destino al principio
-  const urlDestino = `https://visionentrerios.com.ar/noticia.html?id=${id}`;
-
-  try {
-    const respuesta = await fetch(`https://ver.pockethost.io/api/collections/articulos/records/${id}`);
-    
-    // CAMBIO CLAVE: Si Pocketbase nos bloquea, te manda a la noticia igual, nunca al inicio.
-    if (!respuesta.ok) {
-      return Response.redirect(urlDestino, 302);
+    // Si no hay ID, redirigir al inicio
+    if (!id) {
+        return Response.redirect(new URL("/", request.url), 302);
     }
 
-    const noticia = await respuesta.json();
-    const titulo = noticia.titulo;
-    const bajada = noticia.bajada || "Visión Entre Ríos - Periodismo Político y Actualidad";
-    const imagenUrl = `https://ver.pockethost.io/api/files/articulos/${id}/${noticia.imagen}`;
+    try {
+        // 1. Consultar directamente a la API de PocketHost
+        const pbUrl = `https://ver.pockethost.io/api/collections/articulos/records/${id}`;
+        const response = await fetch(pbUrl);
+        
+        if (!response.ok) {
+            return Response.redirect(new URL("/", request.url), 302);
+        }
+        
+        const record = await response.json();
 
-    return new Response(`
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="UTF-8">
-        <title>${titulo}</title>
-        <meta property="og:title" content="${titulo}" />
-        <meta property="og:description" content="${bajada}" />
-        <meta property="og:image" content="${imagenUrl}" />
-        <meta property="og:url" content="${request.url}" />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image">
-        <meta http-equiv="refresh" content="0;url=${urlDestino}">
-      </head>
-      <body>
-        <script>window.location.href = "${urlDestino}";</script>
-      </body>
-      </html>
-    `, {
-      headers: { "content-type": "text/html;charset=UTF-8" }
-    });
+        // 2. Armar la URL exacta de la imagen en PocketBase
+        // Por defecto ponemos el logo, pero si la noticia tiene imagen, la reemplazamos
+        let imageUrl = "https://visionentrerios.com.ar/logotipo.png";
+        if (record.imagen) {
+            imageUrl = `https://ver.pockethost.io/api/files/articulos/${record.id}/${record.imagen}`;
+        }
 
-  } catch (error) {
-    // Si hay cualquier error raro, te manda a la noticia
-    return Response.redirect(urlDestino, 302);
-  }
+        // 3. Crear un HTML básico con las etiquetas (Open Graph) para WhatsApp/Facebook
+        // y una redirección automática a la noticia real para los humanos
+        const html = `
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                
+                <!-- Metadatos dinámicos para redes sociales -->
+                <meta property="og:title" content="${record.titulo.replace(/"/g, '&quot;')} | VER">
+                <meta property="og:description" content="${record.bajada.replace(/"/g, '&quot;')}">
+                <meta property="og:image" content="${imageUrl}">
+                <meta property="og:url" content="${request.url}">
+                <meta property="og:type" content="article">
+                <meta name="twitter:card" content="summary_large_image">
+                
+                <title>${record.titulo} | VER</title>
+                
+                <!-- Redirección inmediata a la noticia real -->
+                <meta http-equiv="refresh" content="0; url=/noticia.html?id=${record.id}">
+                <script>window.location.href = "/noticia.html?id=${record.id}";</script>
+            </head>
+            <body>
+                <p>Redirigiendo a la noticia...</p>
+            </body>
+            </html>
+        `;
+
+        // 4. Entregar este HTML al bot de WhatsApp
+        return new Response(html, {
+            headers: { "content-type": "text/html;charset=UTF-8" },
+        });
+
+    } catch (error) {
+        return Response.redirect(new URL("/", request.url), 302);
+    }
 };
