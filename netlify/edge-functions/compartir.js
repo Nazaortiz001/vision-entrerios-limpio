@@ -22,7 +22,8 @@ export default async (request, context) => {
         // Por defecto ponemos el logo, pero si la noticia tiene imagen, la reemplazamos
         let imageUrl = "https://visionentrerios.com.ar/logotipo.png";
         if (record.imagen) {
-            imageUrl = `https://ver.pockethost.io/api/files/articulos/${record.id}/${record.imagen}`;
+            // ACÁ ESTÁ EL ÚNICO CAMBIO: Agregamos ?thumb=400x300 para alivianar la foto para WhatsApp
+            imageUrl = `https://ver.pockethost.io/api/files/articulos/${record.id}/${record.imagen}?thumb=400x300`;
         }
 
         // 3. Crear un HTML básico con las etiquetas (Open Graph) para WhatsApp/Facebook
