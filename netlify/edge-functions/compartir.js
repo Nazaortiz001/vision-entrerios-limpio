@@ -18,13 +18,15 @@ export default async (request, context) => {
         
         const record = await response.json();
 
-        // 2. Armar la URL exacta de la imagen en PocketBase (TU CÓDIGO ORIGINAL QUE ANDABA)
+        // 2. Armar la URL exacta de la imagen en PocketBase
+        // Por defecto ponemos el logo, pero si la noticia tiene imagen, la reemplazamos
         let imageUrl = "https://visionentrerios.com.ar/logotipo.png";
         if (record.imagen) {
             imageUrl = `https://ver.pockethost.io/api/files/articulos/${record.id}/${record.imagen}`;
         }
 
         // 3. Crear un HTML básico con las etiquetas (Open Graph) para WhatsApp/Facebook
+        // y una redirección automática a la noticia real para los humanos
         const html = `
             <!DOCTYPE html>
             <html lang="es">
@@ -41,7 +43,8 @@ export default async (request, context) => {
                 
                 <title>${record.titulo} | VER</title>
                 
-                <!-- REDIRECCIÓN EXCLUSIVA PARA HUMANOS (Los bots de WhatsApp se quedan acá leyendo la foto) -->
+                <!-- Redirección inmediata a la noticia real -->
+                <meta http-equiv="refresh" content="0; url=/noticia.html?id=${record.id}">
                 <script>window.location.href = "/noticia.html?id=${record.id}";</script>
             </head>
             <body>
@@ -50,7 +53,7 @@ export default async (request, context) => {
             </html>
         `;
 
-        // 4. Entregar este HTML
+        // 4. Entregar este HTML al bot de WhatsApp
         return new Response(html, {
             headers: { "content-type": "text/html;charset=UTF-8" },
         });
